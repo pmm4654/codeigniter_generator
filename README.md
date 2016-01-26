@@ -11,4 +11,6 @@ Use the command:
 
 This will give you a series of questions to generate a Controller, Model and (as of now) a single view.  This will generate a migration, also, but it only works properly for creating a new table.  I plan to add more for updates, deleting, etc.
 
+Doing the full generation of a Controller, Model and view(s) will create the corresponding files in the 'controllers', 'models', and 'views' folders in the 'cli' module.  The migration will go into 'application/migrations'.  If you delete these folders in the 'cli' module, they won't be generated (an issue I plan on fixing).
+
 This is my first CLI generator, so I'm sure there are better ways to write the code.  If you have any ideas/suggestions, let me know!
