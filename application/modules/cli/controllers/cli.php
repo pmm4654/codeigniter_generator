@@ -12,20 +12,32 @@ class Cli extends MX_Controller
 	{
 		$this->load->helper('file');
 		
-
 		echo "What will you name your controller? \n";
 		echo "Controller Name: ";
 		$controller_name = trim(fgets(STDIN));
 
 		$data = $this->return_create_controller($controller_name);
-
-		if ( ! write_file("application/modules/cli/controllers/".$controller_name.".php", $data))
+		if (!file_exists("application/modules/".$controller_name))
 		{
-		     echo 'Unable to write the file';
+			mkdir("application/modules/".$controller_name."/controllers", 0755, true);
+			mkdir("application/modules/".$controller_name."/models", 0755, true);
+			mkdir("application/modules/".$controller_name."/views", 0755, true);
+			if (!file_exists("application/migrations"))
+			{
+				mkdir("application/migrations", 0755, true);
+			}
+		}
+
+		if ( ! write_file("application/modules/".$controller_name."/controllers/".ucfirst($controller_name).".php", $data))
+		{
+		    echo 'Unable to write the file';
+		    if (!file_exists('path/to/directory')) {
+    			
+			}
 		}
 		else
 		{
-		     echo 'File written! '."\n";
+		    echo 'File written! '."\n";
 		}
 
 		echo "Do you want to create a model, as well? (yes/no or y/n) \n";
@@ -43,7 +55,7 @@ class Cli extends MX_Controller
 			$db_fields = explode(",", $db_fields_csv);
 
 			$data = $this->return_create_model($controller_name, $db_fields);
-			if ( ! write_file("application/modules/cli/models/mdl_".$controller_name.".php", $data))
+			if ( ! write_file("application/modules/".$controller_name."/models/Mdl_".$controller_name.".php", $data))
 			{
 			     echo 'Unable to write the file';
 			}
@@ -62,7 +74,8 @@ class Cli extends MX_Controller
 		$migration_name = trim(fgets(STDIN));	
 
 		$migration = $this->return_migration_string($migration_name, $controller_name, $db_fields);
-		$next_migration_version = $this->next_migration();
+		//$next_migration_version = $this->next_migration();
+		$next_migration_version = date('YmdHis');
 		if ( ! write_file("application/migrations/".$next_migration_version."_".$migration_name.".php", $migration))
 		{
 		     echo 'Unable to write the migration file '."\n";
@@ -75,7 +88,7 @@ class Cli extends MX_Controller
 		echo "Generating form... \n";
 
 		$form = $this->return_form_string($controller_name, $db_fields);
-		if ( ! write_file("application/modules/cli/views/".$controller_name."_form.php", $form))
+		if ( ! write_file("application/modules/".$controller_name."/views/".$controller_name."_form.php", $form))
 		{
 		     echo 'Unable to write the file';
 		}
@@ -85,7 +98,7 @@ class Cli extends MX_Controller
 		}
 		echo "Generating table... \n";
 		$table = $this->return_table_row_string($controller_name, $db_fields);
-		if ( ! write_file("application/modules/cli/views/list_".$controller_name.".php", $table))
+		if ( ! write_file("application/modules/".$controller_name."/views/list_".$controller_name.".php", $table))
 		{
 		     echo 'Unable to write the file';
 		}
@@ -116,14 +129,16 @@ class ".ucfirst($controller_name)." extends MX_Controller
 
 	function ".$controller_name."_list() {
 		\$data['query'] = \$this->get('id');
-		\$this->load->view('list_".$controller_name."', \$data);
+		\$data['view_file'] = 'list_".$controller_name."';
+		echo Modules::run('template/admin', \$data);
 	}
 
 	function create()
 	{
 		\$data = \$this->get_data_from_post();
 		\$data['form_location'] = '".$controller_name."/insert_record';
-		\$this->load->view('".$controller_name."_form', \$data);
+		\$data['view_file'] = '".$controller_name."_form';
+		echo Modules::run('template/admin', \$data);
 	}
 
 	function edit() 
@@ -131,7 +146,8 @@ class ".ucfirst($controller_name)." extends MX_Controller
 		\$id = \$this->uri->segment(3);
 		\$data = \$this->get_data_from_db(\$id);
 		\$data['form_location'] = '".$controller_name."/update_record/'.\$id;
-		\$this->load->view('".$controller_name."_form', \$data);
+		\$data['view_file'] = '".$controller_name."_form';
+		echo Modules::run('template/admin', \$data);
 	}
 
 	function insert_record()
@@ -417,9 +433,15 @@ class Migration_".ucfirst($migration_name)." extends CI_Migration
 {
     public function up()
     {
-        \$this->dbforge->add_field('id int(11) unsigned NOT NULL AUTO_INCREMENT');
+		\$this->dbforge->add_field(array(
+		        	'id' => array(
+		        			'type' => 'INT',
+		        			'constraing' => 11,
+		        			'unsigned' => TRUE,
+		        			'auto_increment' => TRUE
+		        		)));
+		        \$this->dbforge->add_key('id', TRUE);
 ".$field_string."
-		\$this->dbforge->add_key('id', TRUE);
 
     	\$this->dbforge->create_table('".$table_name."', TRUE);
 	}
@@ -489,7 +511,7 @@ foreach (\$query->result() as \$row)
 	function run_migrations()
 	{
 		$this->load->library('migration');
-		echo $this->migration->latest();
+		//echo $this->migration->latest();
 		if ( ! $this->migration->latest() )
 		{
 			show_error($this->migration->error_string());
