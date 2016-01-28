@@ -458,16 +458,29 @@ class Migration_".ucfirst($migration_name)." extends CI_Migration
 		$field_string = '';
 		foreach ($db_fields as $field) 
 		{
-			$field_string .= "echo form_input('".$field."', \$".$field.");\n";
+			$field_string .= "<div class='form-group'>\n<label for='input".ucfirst($field)."' class='col-lg-2 control-label'>".ucfirst($field)."</label>\n";
+			$field_string .= "<div class='col-lg-10'>\n";
+			$field_string .= "<input type='text' name='".$field."' class='form-control' id='input".ucfirst($field)."' placeholder='".ucfirst($field)."' value='<?php echo $".$field."; ?>'>\n";
+			$field_string .= "</div>\n</div>";
 		}	
 
 		$data = 
 		"
 <?php
-echo form_open(\$form_location);
+\$attributes['class'] = 'form-horizontal';
+echo form_open(\$form_location, \$attributes);
+?>
+<fieldset>
+    <legend>".ucfirst($controller_name)."</legend>
 ".$field_string."
-echo form_submit('submit', 'Submit');
-echo form_close();
+</fieldset>
+<div class='form-group'>
+  <div class='col-lg-10 col-lg-offset-2'>
+    <button type='reset' class='btn btn-default'>Cancel</button>
+    <button type='submit' class='btn btn-primary'>Submit</button>
+  </div>
+</div>
+<?php echo form_close(); ?>
 ";
 
 		return $data;
