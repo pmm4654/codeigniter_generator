@@ -82,6 +82,16 @@ class Cli extends MX_Controller
 		else
 		{
 		     echo 'File written! '."\n";
+		}
+		echo "Generating table... \n";
+		$table = $this->return_table_row_string($controller_name, $db_fields);
+		if ( ! write_file("application/modules/cli/views/list_".$controller_name.".php", $table))
+		{
+		     echo 'Unable to write the file';
+		}
+		else
+		{
+		     echo 'File written! '."\n";
 		}	
 	}
 	
@@ -434,6 +444,41 @@ echo form_close();
 ";
 
 		return $data;
+	}
+	function testing() {
+		$this->load->helper('file');
+		$db_fields = array('id', 'fart', 'field2');
+		$controller_name = 'fart';
+		$table = $this->return_table_row_string($controller_name, $db_fields);
+
+		if ( ! write_file("application/modules/cli/views/list_".$controller_name.".php", $table))
+		{
+		     echo 'Unable to write the file';
+		}
+		else
+		{
+		     echo 'File written! '."\n";
+		}	
+	}
+
+	function return_table_row_string($controller_name, $db_fields) {
+		$header_field_string = '<table class="table table-hover">'."\n".'<thead>'."\n<tbody>\n";
+		$field_string = '<tr class="searchable">'."\n";
+		$foreach_string = "<?php
+foreach (\$query->result() as \$row)
+{\n";
+		foreach ($db_fields as $field) 
+		{
+			$header_field_string .= "<th>".$field."</th>\n";
+			$field_string .= "<td><?php echo \$".$field."; ?></td>\n";
+			$foreach_string .= "\$".$field." = \$row->".$field.";\n";
+		}
+		$foreach_string .= "?>";
+		$header_field_string .= "</thead>\n</tbody>";
+		$close_field_string = "</tbody>\n</table>";
+		$close_foreach = "</tr>\n<?php \n}\n?>";
+		$table = $header_field_string."\n".$foreach_string."\n".$field_string.$close_foreach."\n".$close_field_string;
+		return $table;
 	}
 
 	function run_migrations()
