@@ -39,8 +39,7 @@ class Auth extends MX_Controller {
 			{
 				$data['users'][$k]->groups = $this->ion_auth->get_users_groups($user->id)->result();
 			}
-			redirect('games/joingame');
-			//$this->load->view('auth_view/main', $data);
+			$this->load->view('auth_view/main', $data);
 		}
 	}
 
