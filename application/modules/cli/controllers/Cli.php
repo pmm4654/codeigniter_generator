@@ -7,7 +7,7 @@ class Cli extends MX_Controller
 	{
 		parent::__construct();
 	}
-	
+
 	function generate()
 	{
 		$this->load->helper('file');
@@ -105,7 +105,18 @@ class Cli extends MX_Controller
 		else
 		{
 		     echo 'File written! '."\n";
-		}	
+		}
+		//needs to be made
+		// echo "Generating dropdown list... \n";
+		// $table = $this->return_dropdown_string($controller_name, $db_fields);
+		// if ( ! write_file("application/modules/".$controller_name."/views/".$controller_name."_dropdown.php", $table))
+		// {
+		//      echo 'Unable to write the file';
+		// }
+		// else
+		// {
+		//      echo 'File written! '."\n";
+		// }		
 	}
 	
 
@@ -125,6 +136,11 @@ class ".ucfirst($controller_name)." extends MX_Controller
 	{
 		parent::__construct();
 		\$this->load->model('mdl_".$controller_name."');
+	}
+
+	function _".$controller_name."_dropdown(\$".$controller_name."_id) {
+		\$data['query'] = \$this->get('id');
+		\$this->load->view('".$controller_name."_dropdown', \$data);
 	}
 
 	function ".$controller_name."_list() {
@@ -466,14 +482,20 @@ class Migration_".ucfirst($migration_name)." extends CI_Migration
 
 		$data = 
 		"
+<div class='panel panel-default'>
 <?php
 \$attributes['class'] = 'form-horizontal';
 echo form_open(\$form_location, \$attributes);
 ?>
+
 <fieldset>
-    <legend>".ucfirst($controller_name)."</legend>
+<div class='panel-heading'>    
+	<legend>".ucfirst($controller_name)."</legend>
+</div>
+<div class='panel-body'>
 ".$field_string."
 </fieldset>
+
 <div class='form-group'>
   <div class='col-lg-10 col-lg-offset-2'>
     <button type='reset' class='btn btn-default'>Cancel</button>
@@ -481,6 +503,8 @@ echo form_open(\$form_location, \$attributes);
   </div>
 </div>
 <?php echo form_close(); ?>
+</div>
+</div>
 ";
 
 		return $data;
